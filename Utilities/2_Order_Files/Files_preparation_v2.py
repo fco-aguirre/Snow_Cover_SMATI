@@ -42,9 +42,9 @@ def _order(source, dest_1, year, check_name):
     else:
         #destination = os.chdir("..")
         #destination = os.chdir("..")
-        destination = os.chdir("..")
-        destination = os.chdir("..")
-        destination = os.chdir('./DATA/' + dest_1 + '/Reflectance_bands') # destination by default
+        #destination = os.chdir("..")
+        #destination = os.chdir("..")
+        destination = os.chdir(dest_1)
         destination = os.getcwd()
         
         

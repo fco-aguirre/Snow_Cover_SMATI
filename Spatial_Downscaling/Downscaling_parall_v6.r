@@ -21,8 +21,7 @@ Z_r = function(n){
 
 library(nlme) # to gls models
 library(gstat) # to variagram
-library(atakrig)
-#library(modiscloud) / revisar!!
+library(atakrig) # to AREA_to_AREA Kriging
 
 
 ## Downscaling Implementing
@@ -43,10 +42,10 @@ opt = parse_args(opt_parser)
 
 source_t <- opt$source
 
-#source_t <- 'Brunswick'
+#source_t <- 'SFS_2024'
 setwd('..')
 getwd()
-setwd(paste0('./Outputs/Order_files/', source_t))
+setwd(paste0('./DATA/', source_t))
 
 year <- opt$year
 
@@ -68,15 +67,29 @@ year <- opt$year
 link <- getwd() # Set source folder
 #setwd(link)
 
-Out_link <- paste0(link,'/Downscaling_files/',year) # set output location / default is in Outputs File
+# set output location / default is in Outputs File
+setwd('..')
+setwd('..')
+
+Out_dir_1 <- dir.create(paste0('./Outputs/', source_t))
+Out_dir_2 <- dir.create(paste0('./Outputs/', source_t,'/Downscaling_files'))
+Out_dir_3 <- dir.create(paste0('./Outputs/', source_t,'/Downscaling_files/',year))
+
+setwd(paste0('./Outputs/', source_t))
+link_2 <- getwd()
+
+Out_link <- paste0(link_2,'/Downscaling_files/',year)
 #Out_link_1 <- paste0(link,'/Downscaling_files')
 #Out_link_2 <- paste0(link,'/Downscaling_files/',year)
 #Out_dir_1 <- dir.create(Out_link_1)
-Out_dir <- dir.create(Out_link)
+#Out_dir <- dir.create(Out_link)
 #library(tictoc)
 
 #link_b <- paste0(link,'Reflectance_bands/',year)
 #path_mod09ga_file <- paste0(link_f,'/MOD09GA/')
+
+setwd(link)
+
 
 ## Read master files
 #mod09ga_file <- readLines(paste0('Reflectance_bands/',year,'/MOD09GA/',year,'_MOD09GA'))
@@ -98,13 +111,16 @@ day_year <- vector(mode = "list", length = day_f)
 band_1_250_p <- raster(paste0('Reflectance_bands/',year,'/MOD09GQ/',mod09gq_file[1]))
 band_1_500_p <- raster(paste0('Reflectance_bands/',year,'/MOD09GA/',mod09ga_file[2]))
 
-#shape <- readOGR('Cuencas/Cuencas_brunswick_UTM.shp') ## rgdal is discontinued
-shape <- vect('Cuencas/Cuencas_brunswick_UTM.shp') # Here we used terra package
+## Read parameters file
+parameter_file <-readLines('Parameters_Data')
 
-Band_water <- raster('land_water_mask/MOD44W_A2015.tif')
+#shape <- readOGR('Cuencas/Cuencas_brunswick_UTM.shp') ## rgdal is discontinued
+shape <- vect(paste0('./Watershed/',parameter_file[2])) # Here we used terra package
+
+Band_water <- raster(paste0('./land_water_mask/',parameter_file[3]))
 names(Band_water) <- 'Water'
 
-dem <- raster('DEM/Brunswick_v2.tif') # realizado con clip by extent Qgis
+dem <- raster(paste0('./DEM/',parameter_file[4])) # realizado con clip by extent Qgis
 
 # Mascara de agua
 Band_water[Band_water$Water == 1] <- NaN  # se cambio Na
@@ -128,9 +144,10 @@ names(dem_500) <- 'elevation'
 dem_500_f <- stack(dem_500,dem_500_t)
 
 # Define ata-pred con valores NaNs!
-
+# Check projection
+crs_1 <- crs(shape) # extract projection in UTM
 band_250_st <- stack(band_1_250_p,dem_250_f) 
-band_250_nan <- projectRaster(band_250_st, res=250, crs=CRS("EPSG:32719"), method = 'ngb') ## the type of projection has been modified!!
+band_250_nan <- projectRaster(band_250_st, res=250, crs = crs_1, method = 'ngb') ## the type of projection has been modified!!
 
 
 #r1 <- band_250_nan
@@ -518,8 +535,8 @@ for (k in 1:day_f){
       names(band_500_s) <- c('band_1', 'band_2', 'band_3', 'band_4', 'band_5', 'band_6', 'band_7','Dem_500','slope','aspect', 'Mask')
       
       #reproject to UTM
-      band_250_s_UTM <- projectRaster(band_250_s, res=250, crs=CRS("EPSG:32719"), method = 'ngb')
-      band_500_s_UTM <- projectRaster(band_500_s, res=500, crs=CRS("EPSG:32719"), method = 'ngb')
+      band_250_s_UTM <- projectRaster(band_250_s, res=250, crs = crs_1, method = 'ngb') # was changed from crs=CRS("EPSG:32719")
+      band_500_s_UTM <- projectRaster(band_500_s, res=500, crs = crs_1, method = 'ngb')
       
       # data
       R.500 <- crop(rast(band_500_s_UTM), ext(shape_pol))
@@ -785,7 +802,7 @@ for (k in 1:day_f){
         } else {
           ## Generar el raster final
           #pred.ataok <- ataKriging(res_500_list[[ak]], grid.pred_250, v_fit_list[[ak]], showProgress=T)
-          res.r_250_2 <- rasterFromXYZ(pred.ataok[,2:4], crs = "+init=epsg:32719")
+          res.r_250_2 <- rasterFromXYZ(pred.ataok[,2:4], crs = crs_1) # was changed from crs = "+init=epsg:32719"
           res.r_250_f_2 <- res.r_250_2 * Band_250$Mask
           
           p_l_250_2 <- predict(Band_250, gls_mod_f[[ak]])
@@ -874,7 +891,7 @@ for (k in 1:day_f){
       }
       #arma raster cloud cover
       coordinates(cloud_mask.p.frame) <- ~x+y
-      proj4string(cloud_mask.p.frame) <- CRS("+init=epsg:32719") # UTM huso 19S WGS84
+      proj4string(cloud_mask.p.frame) <- crs_1 # UTM huso 19S WGS84 # was changed from CRS("+init=epsg:32719")
       cloud_mask_r <- rasterFromXYZ(cloud_mask.p.frame[,5])
       
       Band_250$cloud_mask <- resample(cloud_mask_r, Band_250$band_1, method='ngb')

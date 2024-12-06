@@ -11,7 +11,7 @@
   - finish this path with the year to be processed, i.e.: /2015
   - also you can put only '.' if you want to use the example files
 ### 2. -d DIR, destination DIR, 
-  - the path to the place to order your files, must be located inside of Data folder in the Script package: '/Users/xxxx/xxxxx/Snow_Cover_SMATI/Data/*<name_project>*/Refelctance_bands'
+  - the path to the place to order your files, must be located inside of Data folder in the Script package: '/Users/xxxx/xxxxx/Snow_Cover_SMATI/Data/*<name_project>*/Reflectance_bands'
   - the *<name_project>* is important to keep in order the data structure of the package.
   - so this sub-folder must be created inside the DATA directory before run the script
   - also you can put only 'Brunswick' if you want to use the example files

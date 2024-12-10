@@ -21,7 +21,7 @@ opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 
 source_t <- opt$name
-source_t <- 'SFS_2024'
+source_t <- 'Ferrier_2024'
 
 setwd('..')
 
@@ -140,7 +140,7 @@ if(is.nan(b1_250_m)|is.nan(b2_250_m)|is.nan(b3_250_m)|is.nan(b4_250_m)|is.nan(b5
   #Snow_f_gz <- (probs$Snow_10 * 10) + (probs$Snow_100 * 100) + (probs$Snow_250 * 250) + (probs$Snow_1000 * 1000) No esta bien.....
   
   Snow_f_gz <- ((probs$Snow_10/Snow_f) * 10) + ((probs$Snow_100/Snow_f) * 100) + ((probs$Snow_250/Snow_f) * 250) + ((probs$Snow_1000/Snow_f) * 1000)
-  #plot(Snow_f_gz)
+  plot(Snow_f_gz)
   
   ## Zenith
   zenith_r <- high_atk_GLS$zenith
@@ -215,6 +215,7 @@ if(is.nan(b1_250_m)|is.nan(b2_250_m)|is.nan(b3_250_m)|is.nan(b4_250_m)|is.nan(b5
   Sw_B_30 <- 0.2205
   pend_Sw_A <- -3.9*10^(-4)
   pend_Sw_B <- 1.77*10^(-4)
+  
   
   for(a in 1:nrow(Snow_st.p.frame)){
     if(is.nan(Snow_st.p.frame[a,9])){

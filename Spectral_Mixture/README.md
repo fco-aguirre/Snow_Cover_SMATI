@@ -10,4 +10,6 @@ This is the 2° script and run on your downscaled images
     
 1. -n --name, the name of your main folder, as in the example: ***Brunswick***
 2. -y --year, the year to apply this script
-- Important to note that the folder named: ***Mesma_albedo*** must be created inside the folder ./Order_files/<name>, befor run this script
+
+### The product of this scripts is:
+The product is a raster image with..... (mencionar bandas)

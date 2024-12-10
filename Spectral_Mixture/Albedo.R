@@ -8,11 +8,13 @@ Sw_B_30 <- 0.2205
 pend_Sw_A <- -3.9*10^(-4)
 pend_Sw_B <- 1.77*10^(-4)
 
+## revisar limite de snow fraction para realizar el calculo del albedo
+
 for(a in 1:nrow(Snow_st.p.frame)){
   if(is.nan(Snow_st.p.frame[a,9])){
     Snow_st.p.frame[a,11] <- NaN
   }else{
-    if(Snow_st.p.frame[a,9] >= 0.05){
+    if(Snow_st.p.frame[a,9] >= 0.01){
       Sw_A_ang <- pend_Sw_A*(Snow_st.p.frame[a,6]-30) + Sw_A_30
       Sw_B_ang <- pend_Sw_B*(Snow_st.p.frame[a,6]-30) + Sw_B_30
       
